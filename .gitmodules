@@ -10,3 +10,6 @@
 [submodule "FoundryFundamentals/Lottery/lib/forge-std"]
 	path = FoundryFundamentals/Lottery/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "FoundryFundamentals/Lottery/lib/chainlink"]
+	path = FoundryFundamentals/Lottery/lib/chainlink
+	url = https://github.com/smartcontractkit/chainlink
