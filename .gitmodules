@@ -13,3 +13,9 @@
 [submodule "FoundryFundamentals/Lottery/lib/chainlink"]
 	path = FoundryFundamentals/Lottery/lib/chainlink
 	url = https://github.com/smartcontractkit/chainlink
+[submodule "FoundryFundamentals/Lottery/lib/solmate"]
+	path = FoundryFundamentals/Lottery/lib/solmate
+	url = https://github.com/transmissions11/solmate
+[submodule "FoundryFundamentals/Lottery/lib/foundry-devops"]
+	path = FoundryFundamentals/Lottery/lib/foundry-devops
+	url = https://github.com/ChainAccelOrg/foundry-devops
