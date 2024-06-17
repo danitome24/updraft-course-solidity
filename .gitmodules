@@ -19,3 +19,6 @@
 [submodule "FoundryFundamentals/Lottery/lib/foundry-devops"]
 	path = FoundryFundamentals/Lottery/lib/foundry-devops
 	url = https://github.com/ChainAccelOrg/foundry-devops
+[submodule "FoundryAdvanced/ERC20Token/lib/forge-std"]
+	path = FoundryAdvanced/ERC20Token/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
