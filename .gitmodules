@@ -25,3 +25,6 @@
 [submodule "FoundryAdvanced/ERC20Token/lib/openzeppelin-contracts"]
 	path = FoundryAdvanced/ERC20Token/lib/openzeppelin-contracts
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "FoundryAdvanced/ERC721Nft/lib/forge-std"]
+	path = FoundryAdvanced/ERC721Nft/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
