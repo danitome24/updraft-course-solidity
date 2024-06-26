@@ -31,7 +31,7 @@ snapshot :; forge snapshot
 
 format :; forge fmt
 
-anvil :; anvil -m 'test test test test test test test test test test test junk' --steps-tracing --block-time 1
+anvil :; anvil -m 'test test test test test test test test test test test junk'
 
 NETWORK_ARGS := --rpc-url http://localhost:8545 --private-key $(DEFAULT_ANVIL_KEY) --broadcast
 
@@ -44,3 +44,12 @@ deploy:
 
 mint:
 	@forge script script/Interactions.s.sol:MintBasicNft ${NETWORK_ARGS}
+
+deployMood:
+	@forge script script/DeployMoodNft.s.sol:DeployMoodNft $(NETWORK_ARGS)
+
+mintMood:
+	@forge script script/Interactions.s.sol:MintMoodNft ${NETWORK_ARGS}
+
+flipMood:
+	@forge script script/Interactions.s.sol:FlipMoodNft ${NETWORK_ARGS}
