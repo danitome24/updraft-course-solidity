@@ -34,3 +34,6 @@
 [submodule "FoundryAdvanced/ERC721Nft/lib/foundry-devops"]
 	path = FoundryAdvanced/ERC721Nft/lib/foundry-devops
 	url = https://github.com/Cyfrin/foundry-devops
+[submodule "DeFi/stablecoin/lib/forge-std"]
+	path = DeFi/stablecoin/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
