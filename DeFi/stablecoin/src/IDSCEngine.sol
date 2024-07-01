@@ -2,7 +2,11 @@
 pragma solidity ^0.8.20;
 
 interface IDSCEngine {
-    function depositCollateralAndMintDSC() external;
+    function depositCollateralAndMintDSC(
+        address tokenCollateralAddress,
+        uint256 amountCollateral,
+        uint256 amountDscToMint
+    ) external;
 
     /**
      * @param tokenCollateralAddress The address of the token to deposit as collateral
@@ -10,9 +14,10 @@ interface IDSCEngine {
      */
     function depositCollateral(address tokenCollateralAddress, uint256 amountCollateral) external;
 
-    function redeemCollateralForDSC() external;
+    function redeemCollateralForDSC(address tokenCollateralAddress, uint256 amountCollateral, uint256 amountDscToBurn)
+        external;
 
-    function redeemCollateral() external;
+    function redeemCollateral(address tokenCollateralAddress, uint256 amountCollateral) external;
 
     /**
      * @param amountDscToMint The amount of DSC to mint
@@ -20,7 +25,7 @@ interface IDSCEngine {
      */
     function mintDSC(uint256 amountDscToMint) external;
 
-    function burnDSC() external;
+    function burnDSC(uint256 amountDscToBurn) external;
 
     function liquidate() external;
 
