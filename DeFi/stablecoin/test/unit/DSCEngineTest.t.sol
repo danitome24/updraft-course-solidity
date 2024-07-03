@@ -47,4 +47,8 @@ contract DSCEngineTest is Test {
         dscEngine.depositCollateral(weth, 0);
         vm.stopPrank();
     }
+
+    function test() public {
+        
+    }
 }

@@ -25,7 +25,7 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/Ag
  * @notice This contract is the core of the DSC System. It handles all the logic for mining and redeeming DSC, as well as
  * depositing & withdrawing collateral. This conttract is VERY loosely base on the MarkerDAO DSS (DAI) System.
  */
-contract DSCEngine is IDSCEngine, ReentrancyGuard {
+contract DSCEngine is /*IDSCEngine,*/ ReentrancyGuard {
     ////
     // Errors
     ////
@@ -37,6 +37,7 @@ contract DSCEngine is IDSCEngine, ReentrancyGuard {
     error DSCEngine__HealthFactorIsBelowMin(uint256 healthFactor);
     error DSCEngine__MintFailed();
     error DSCEngine__HealthFactorOk();
+    error DSCEngine__HealthFactorNotImproved();
 
     ////
     // State variables
@@ -60,7 +61,9 @@ contract DSCEngine is IDSCEngine, ReentrancyGuard {
     // Events
     ////
     event CollateralDeposited(address indexed user, address indexed token, uint256 amount);
-    event CollateralRedeemed(address indexed user, address indexed token, uint256 amount);
+    event CollateralRedeemed(
+        address indexed redeemedFrom, address indexed redeemedTo, address indexed token, uint256 amount
+    );
 
     ////
     // Modifiers
@@ -152,13 +155,7 @@ contract DSCEngine is IDSCEngine, ReentrancyGuard {
         moreThanZero(amountCollateral)
         nonReentrant
     {
-        s_collateralDeposited[msg.sender][tokenCollateralAddress] -= amountCollateral;
-        emit CollateralRedeemed(msg.sender, tokenCollateralAddress, amountCollateral);
-
-        bool success = IERC20(tokenCollateralAddress).transfer(msg.sender, amountCollateral);
-        if (!success) {
-            revert DSCEngine__TransferFailed();
-        }
+        _redeemCollateral(msg.sender, msg.sender, tokenCollateralAddress, amountCollateral);
         _revertIfHealthFactorIsBroken(msg.sender);
     }
 
@@ -174,12 +171,7 @@ contract DSCEngine is IDSCEngine, ReentrancyGuard {
     }
 
     function burnDSC(uint256 amountDscToBurn) public moreThanZero(amountDscToBurn) {
-        s_dscMinted[msg.sender] -= amountDscToBurn;
-        bool success = i_dsc.transferFrom(msg.sender, address(this), amountDscToBurn);
-        if (!success) {
-            revert DSCEngine__TransferFailed();
-        }
-        i_dsc.burn(amountDscToBurn);
+        _burnDSC(amountDscToBurn, msg.sender, msg.sender);
         _revertIfHealthFactorIsBroken(msg.sender);
     }
 
@@ -213,6 +205,15 @@ contract DSCEngine is IDSCEngine, ReentrancyGuard {
         // Give 10% bonus to liquidator.
         uint256 bonusCollateral = tokenAmountFromDebtCovered * LIQUIDATION_BONUS;
         uint256 totalCollateralToRedeem = tokenAmountFromDebtCovered + bonusCollateral;
+
+        _redeemCollateral(user, msg.sender, collateral, totalCollateralToRedeem);
+        _burnDSC(debtToCover, user, msg.sender);
+
+        uint256 endingUserHealthFactor = _healthFactor(user);
+        if (endingUserHealthFactor <= startingUserHealthFactor) {
+            revert DSCEngine__HealthFactorNotImproved();
+        }
+        _revertIfHealthFactorIsBroken(msg.sender);
     }
 
     function getHealthFactor() external view {}
@@ -220,6 +221,27 @@ contract DSCEngine is IDSCEngine, ReentrancyGuard {
     ////
     // Private & Internal View functions
     ////
+
+    function _burnDSC(uint256 amountDscToBurn, address onBehalfOf, address dscFrom) private {
+        s_dscMinted[onBehalfOf] -= amountDscToBurn;
+        bool success = i_dsc.transferFrom(dscFrom, address(this), amountDscToBurn);
+        if (!success) {
+            revert DSCEngine__TransferFailed();
+        }
+        i_dsc.burn(amountDscToBurn);
+    }
+
+    function _redeemCollateral(address from, address to, address tokenCollateralAddress, uint256 amountCollateral)
+        private
+    {
+        s_collateralDeposited[from][tokenCollateralAddress] -= amountCollateral;
+        emit CollateralRedeemed(from, to, tokenCollateralAddress, amountCollateral);
+
+        bool success = IERC20(tokenCollateralAddress).transfer(to, amountCollateral);
+        if (!success) {
+            revert DSCEngine__TransferFailed();
+        }
+    }
 
     function _getAccountInformation(address user)
         private
