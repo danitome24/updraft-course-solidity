@@ -222,6 +222,16 @@ contract DSCEngine is /*IDSCEngine,*/ ReentrancyGuard {
     // Private & Internal View functions
     ////
 
+    function _calculateHealthFactor(uint256 totalDscMinted, uint256 collateralValueInUsd)
+        internal
+        pure
+        returns (uint256)
+    {
+        if (totalDscMinted == 0) return type(uint256).max;
+        uint256 collateralAdjustedForThreshold = (collateralValueInUsd * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
+        return (collateralAdjustedForThreshold * PRECISION) / totalDscMinted;
+    }
+
     function _burnDSC(uint256 amountDscToBurn, address onBehalfOf, address dscFrom) private {
         s_dscMinted[onBehalfOf] -= amountDscToBurn;
         bool success = i_dsc.transferFrom(dscFrom, address(this), amountDscToBurn);
@@ -261,14 +271,7 @@ contract DSCEngine is /*IDSCEngine,*/ ReentrancyGuard {
      */
     function _healthFactor(address user) private view returns (uint256) {
         (uint256 totalDscMinted, uint256 collateralValueInUsd) = _getAccountInformation(user);
-        uint256 collateralAdjustedForThreshold = (collateralValueInUsd * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
-
-        // $150 ETH / 100 DSC = 1.5
-        // 150 * 50 = 7500 / 100 = 75 -> (75 / 100(dsc)) < 1 => liquidate
-        //
-        // $1000 ETH / 100 DSC
-        // 1000 * 50 = 50000 / 100 = (500 / 100) > 1 => OK
-        return (collateralAdjustedForThreshold * PRECISION) / totalDscMinted;
+        return _calculateHealthFactor(totalDscMinted, collateralValueInUsd);
     }
 
     function _revertIfHealthFactorIsBroken(address user) internal view {
@@ -304,5 +307,33 @@ contract DSCEngine is /*IDSCEngine,*/ ReentrancyGuard {
         (, int256 price,,,) = priceFeed.latestRoundData();
 
         return (usdAmountInWei * PRECISION) / (uint256(price) * ADDITIONAL_FEED_PRECISION);
+    }
+
+    function getAccountInformation(address user)
+        external
+        view
+        returns (uint256 totalDscMinted, uint256 collateralValueInUsd)
+    {
+        (totalDscMinted, collateralValueInUsd) = _getAccountInformation(user);
+    }
+
+    function getHealthFactor(address user) public view returns (uint256) {
+        return _healthFactor(user);
+    }
+
+    function getAdditionalFeedPrecision() public pure returns (uint256) {
+        return ADDITIONAL_FEED_PRECISION;
+    }
+
+    function getPrecision() public pure returns (uint256) {
+        return PRECISION;
+    }
+
+    function calculateHealthFactor(uint256 totalDscMinted, uint256 collateralValueInUsd)
+        external
+        pure
+        returns (uint256)
+    {
+        return _calculateHealthFactor(totalDscMinted, collateralValueInUsd);
     }
 }
