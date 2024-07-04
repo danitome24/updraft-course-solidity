@@ -33,10 +33,13 @@ contract Invariants is StdInvariant, Test {
         (dsc, dscEngine, helperConfig) = deployer.run();
         (,, weth, wbtc,) = helperConfig.activeNetworkConfig();
         //targetContract(address(dscEngine));  <- Cannot do this, invariants calls functions in random order so always fail.
-        handler = new Handler(dscEngine, dsc); //<- We han handle function order calls with handlers.
+        handler = new Handler(dscEngine, dsc); //<- We can handle function order calls with handlers.
         targetContract(address(handler));
     }
 
+    /**
+     * We need to have more ETH + BTC $ worth than DSC supplied.
+     */
     function invariant_protocolMustHaveMoreValueThanTotalSupply() public view {
         // Get the value of all the collateral in the protocol
         // Compare it to all the debt (dsc)

@@ -27,7 +27,6 @@ contract Handler is Test {
         wbtc = ERC20Mock(collatTokens[1]);
     }
 
-    // Redeem collateral <- call this when there is collateral
     function depositCollateral(uint256 collateralSeed, uint256 randomAmountCollateral) public {
         ERC20Mock collateral = _getCollateralAddressFromSeed(collateralSeed);
         randomAmountCollateral = bound(randomAmountCollateral, 1, MAX_DEPOSIT_SIZE);
@@ -37,6 +36,18 @@ contract Handler is Test {
         collateral.approve(address(dscEngine), randomAmountCollateral);
         dscEngine.depositCollateral(address(collateral), randomAmountCollateral);
         vm.stopPrank();
+    }
+
+    function redeemCollateral(uint256 collateralSeed, uint256 randomAmountCollateralToRedeem) public {
+        ERC20Mock collateral = _getCollateralAddressFromSeed(collateralSeed);
+        uint256 maxCollateralToRedeem = dscEngine.getCollateralBalanceFromUser(msg.sender, address(collateral));
+
+        randomAmountCollateralToRedeem = bound(randomAmountCollateralToRedeem, 0, maxCollateralToRedeem);
+        if (randomAmountCollateralToRedeem == 0) {
+            return;
+        }
+        vm.prank(msg.sender);
+        dscEngine.redeemCollateral(address(collateral), randomAmountCollateralToRedeem);
     }
 
     // Helper functions
