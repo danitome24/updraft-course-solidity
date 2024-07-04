@@ -340,4 +340,8 @@ contract DSCEngine is /*IDSCEngine,*/ ReentrancyGuard {
     function getLiquidationThreshold() public pure returns (uint256) {
         return LIQUIDATION_THRESHOLD;
     }
+
+    function getCollateralTokens() public view returns (address[] memory) {
+        return s_collateralTokens;
+    }
 }
