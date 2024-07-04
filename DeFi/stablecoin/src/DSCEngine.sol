@@ -336,4 +336,8 @@ contract DSCEngine is /*IDSCEngine,*/ ReentrancyGuard {
     {
         return _calculateHealthFactor(totalDscMinted, collateralValueInUsd);
     }
+
+    function getLiquidationThreshold() public pure returns (uint256) {
+        return LIQUIDATION_THRESHOLD;
+    }
 }

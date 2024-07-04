@@ -107,6 +107,16 @@ contract DSCEngineTest is Test {
         _;
     }
 
+    modifier depositedCollateralAndMintDSC() {
+        uint256 amountToMint = 100;
+        vm.startPrank(USER);
+        ERC20Mock(weth).approve(address(dscEngine), AMOUNT_COLLATERAL);
+        dscEngine.depositCollateral(weth, AMOUNT_COLLATERAL);
+        dscEngine.mintDSC(amountToMint);
+        vm.stopPrank();
+        _;
+    }
+
     function testCanDepositCollateralAndGetAccountInfo() public depositedCollateral {
         (uint256 totalDSCMinted, uint256 collateralValueInUsd) = dscEngine.getAccountInformation(USER);
 
@@ -168,5 +178,32 @@ contract DSCEngineTest is Test {
         );
         dscEngine.mintDSC(amountToMint);
         vm.stopPrank();
+    }
+
+    ////
+    // Burn DSC Test
+    ////
+    function testCanBurnDsc() public depositedCollateralAndMintDSC {
+        uint256 userDscBeforeBurn = ERC20Mock(address(dsc)).balanceOf(USER);
+        uint256 dscToBurn = 50;
+        vm.startPrank(USER);
+        ERC20Mock(address(dsc)).approve(address(dscEngine), dscToBurn);
+        dscEngine.burnDSC(dscToBurn);
+        vm.stopPrank();
+        uint256 userDscAfterBurn = ERC20Mock(address(dsc)).balanceOf(USER);
+
+        assertEq(userDscBeforeBurn - dscToBurn, userDscAfterBurn);
+    }
+
+    ////
+    // Health Factor Test
+    ////
+    function testReturnsMaxHealthFactorIfNoDSCMinted() public view {
+        uint256 dscMinted = 0;
+        uint256 collateralValue = 150;
+
+        uint256 healthFactor = dscEngine.calculateHealthFactor(dscMinted, collateralValue);
+
+        assertEq(type(uint256).max, healthFactor);
     }
 }
