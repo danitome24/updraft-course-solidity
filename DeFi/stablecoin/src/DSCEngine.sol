@@ -6,6 +6,7 @@ import {DecentralizedStableCoin} from "./DecentralizedStableCoin.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import {OracleLib} from "./libraries/OracleLib.sol";
 
 /**
  * @title DSCEngine
@@ -38,6 +39,11 @@ contract DSCEngine is /*IDSCEngine,*/ ReentrancyGuard {
     error DSCEngine__MintFailed();
     error DSCEngine__HealthFactorOk();
     error DSCEngine__HealthFactorNotImproved();
+
+    ////
+    // Type
+    ////
+    using OracleLib for AggregatorV3Interface;
 
     ////
     // State variables
@@ -269,7 +275,7 @@ contract DSCEngine is /*IDSCEngine,*/ ReentrancyGuard {
      * If user goes below 1, then they can get liquidated.
      * @param user User address
      */
-    function _healthFactor(address user) private view returns (uint256) {
+    function _healthFactor(address user) public view returns (uint256) {
         (uint256 totalDscMinted, uint256 collateralValueInUsd) = _getAccountInformation(user);
         return _calculateHealthFactor(totalDscMinted, collateralValueInUsd);
     }
@@ -296,7 +302,7 @@ contract DSCEngine is /*IDSCEngine,*/ ReentrancyGuard {
     function getUsdValue(address token, uint256 amount) public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
 
-        (, int256 price,,,) = priceFeed.latestRoundData();
+        (, int256 price,,,) = priceFeed.staleCheckLastestRoundData();
 
         uint256 usdValueFromAmount = amount * (uint256(price) * ADDITIONAL_FEED_PRECISION) / PRECISION;
         return usdValueFromAmount;
@@ -304,7 +310,7 @@ contract DSCEngine is /*IDSCEngine,*/ ReentrancyGuard {
 
     function getTokenAmountFromUsd(address token, uint256 usdAmountInWei) public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
-        (, int256 price,,,) = priceFeed.latestRoundData();
+        (, int256 price,,,) = priceFeed.staleCheckLastestRoundData();
 
         return (usdAmountInWei * PRECISION) / (uint256(price) * ADDITIONAL_FEED_PRECISION);
     }
@@ -345,7 +351,15 @@ contract DSCEngine is /*IDSCEngine,*/ ReentrancyGuard {
         return s_collateralTokens;
     }
 
-    function getCollateralBalanceFromUser(address user, address token) public view returns(uint256) {
+    function getCollateralBalanceFromUser(address user, address token) public view returns (uint256) {
         return s_collateralDeposited[user][token];
+    }
+
+    function getCollateralTokenPriceFeed(address token) public view returns (address) {
+        return s_priceFeeds[token];
+    }
+
+    function getMinHealthFactor() public pure returns (uint256) {
+        return MIN_HEALTH_FACTOR;
     }
 }
