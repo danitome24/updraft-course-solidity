@@ -222,8 +222,6 @@ contract DSCEngine is /*IDSCEngine,*/ ReentrancyGuard {
         _revertIfHealthFactorIsBroken(msg.sender);
     }
 
-    function getHealthFactor() external view {}
-
     ////
     // Private & Internal View functions
     ////
