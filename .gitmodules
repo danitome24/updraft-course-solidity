@@ -43,3 +43,6 @@
 [submodule "FoundryAdvanced/stablecoin/lib/chainlink-brownie-contracts"]
 	path = FoundryAdvanced/stablecoin/lib/chainlink-brownie-contracts
 	url = https://github.com/smartcontractkit/chainlink-brownie-contracts
+[submodule "FoundryAdvanced/merkle-airdrop/lib/forge-std"]
+	path = FoundryAdvanced/merkle-airdrop/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
