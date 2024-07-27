@@ -55,3 +55,6 @@
 [submodule "FoundryAdvanced/merkle-airdrop/lib/foundry-devops"]
 	path = FoundryAdvanced/merkle-airdrop/lib/foundry-devops
 	url = https://github.com/cyfrin/foundry-devops
+[submodule "FoundryAdvanced/upgradeables-contracts/lib/forge-std"]
+	path = FoundryAdvanced/upgradeables-contracts/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
