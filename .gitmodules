@@ -67,3 +67,6 @@
 [submodule "FoundryAdvanced/upgradeables-contracts/lib/foundry-devops"]
 	path = FoundryAdvanced/upgradeables-contracts/lib/foundry-devops
 	url = https://github.com/Cyfrin/foundry-devops
+[submodule "FoundryAdvanced/dao/lib/forge-std"]
+	path = FoundryAdvanced/dao/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
